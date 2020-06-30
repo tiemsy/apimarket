@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Core\Annotation\ApiResource;
 use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 /**
  * @ApiResource()
@@ -21,36 +22,53 @@ class Product
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
+     * @Assert\Length(min=3)
      */
     private $name;
 
     /**
-     * @ORM\Column(type="text", nullable=true)
+     * @ORM\Column(type="text")
+     * @Assert\NotBlank
+     * @Assert\Length(min=3)
      */
     private $description;
 
     /**
      * @ORM\Column(type="string", length=255)
+     * @Assert\NotBlank
      */
     private $color;
 
     /**
      * @ORM\Column(type="float")
+     * @Assert\NotBlank
      */
     private $weight;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank
+     * @Assert\Type(
+     *     type="integer",
+     *     message="The value {{ value }} is not a valid {{ type }}."
+     * )
      */
     private $price_ht;
 
     /**
      * @ORM\Column(type="integer")
+     * @Assert\NotBlank
+     * @Assert\Type(
+     *     type="integer",
+     *     message="The value {{ value }} is not a valid {{ type }}."
+     * )
      */
     private $price_ttc;
 
     /**
      * @ORM\Column(type="boolean")
+     * @Assert\NotBlank
      */
     private $stock;
 
@@ -58,6 +76,11 @@ class Product
      * @ORM\Column(type="datetime")
      */
     private $created_at;
+
+    public function __construct()
+    {
+        $this->created_at = new \DateTime();
+    }
 
     public function getId(): ?int
     {
