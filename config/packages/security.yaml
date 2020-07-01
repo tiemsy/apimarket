@@ -1,7 +1,11 @@
 security:
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_ADMIN]
+
     encoders:
         App\Entity\User:
-            algorithm: auto
+            algorithm: bcrypt
+            cost: 12
 
     # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
     providers:
@@ -14,26 +18,31 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-#        main:
-#            anonymous: true
-#            lazy: true
-#            provider: app_user_provider
-        login:
-            pattern: ^/api/login
-            stateless: true
+
+        main:
             anonymous: true
             json_login:
-                check_path: /api/login_check
+                check_path: /authentication_token
+                username_path: email
+                password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
         api:
             pattern: ^/api
             stateless: true
+            anonymous: true
+            provider: app_user_provider
             guard:
                 authenticators:
                 - lexik_jwt_authentication.jwt_token_authenticator
+                - App\Security\LoginFormAuthenticator
+                entry_point: lexik_jwt_authentication.jwt_token_authenticator
+
             logout:
                 path: app_logout
+
+            form_login:
+                check_path: login
 
 
             # activate different ways to authenticate
@@ -47,3 +56,6 @@ security:
     access_control:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api, roles: [ROLE_ADMIN, ROLE_USER, IS_AUTHENTICATED_ANONYMOUSLY] } # Allows accessing the Swagger UI
+        - { path: ^/authentication_token, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/, roles: [ROLE_ADMIN, ROLE_USER, IS_AUTHENTICATED_FULLY] }
